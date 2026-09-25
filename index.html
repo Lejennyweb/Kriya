@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e6eadb">
+  <meta name="description" content="Kriya. Two a day for 40 days from 21 Sep 2026, then one a day through 21 Mar 2027.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kriya">
+  <title>Kriya</title>
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="app">
+    <section id="view-kriya" class="on">
+      <div class="hero">
+        <p class="count" id="count">Now</p>
+        <button type="button" class="bell" id="reminders" aria-pressed="false" aria-label="Turn on reminders">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4.2v1.3M6.8 16.8h10.4l-1.2-1.9V10a4 4 0 0 0-8 0v4.9l-1.2 1.9z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"></path>
+            <path d="M10 16.8a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="snack-line" id="snack-line"></p>
+      <div class="running" id="running" hidden>
+        <div>
+          <b>Guidance is running</b>
+          <div class="muted" id="running-clock"></div>
+        </div>
+        <button type="button" class="ghost" id="open-guide">Open</button>
+      </div>
+      <div class="row">
+        <button type="button" class="primary" id="start-guide">Begin</button>
+      </div>
+      <p class="section-note" id="today-count">0 of 2 is done</p>
+      <ul class="messages marks" id="messages"></ul>
+      <div class="day-actions">
+        <button type="button" class="did" id="did-one">I did one today</button>
+        <div class="ask" id="kriya-ask" hidden>
+          <p class="section-note" id="kriya-ask-text"></p>
+          <div class="row">
+            <button type="button" class="ghost" id="log-missing">Log a missing kriya</button>
+            <button type="button" class="ghost" id="still-to-do">I still need to do it</button>
+          </div>
+          <form class="form" id="missing-form" hidden>
+            <label>Time
+              <input type="time" id="missing-when" required>
+            </label>
+            <button type="submit" class="primary">Log it</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-food" hidden>
+      <div class="food-buttons" id="food-buttons">
+        <button type="button" data-food="meal"><b>Meal</b><small id="food-meal">4 hours</small></button>
+        <button type="button" data-food="snack"><b>Snack</b><small id="food-snack">2.5 hours</small></button>
+        <button type="button" data-food="beverage"><b>Tea</b><small id="food-beverage">1.5 hours</small></button>
+        <button type="button" data-food="water"><b>Water</b><small id="food-water">open</small></button>
+      </div>
+      <ul class="log meal-log" id="meal-list" hidden></ul>
+      <p class="rules">Also 4 hours after the previous kriya. Water is fine any time.</p>
+
+      <div class="counts">
+        <h2>What counts</h2>
+
+        <details>
+          <summary>Full meal <span>4 hours</span></summary>
+          <p>Anything cooked and substantial. If you sat down and ate a proper plate, it is a meal.</p>
+          <ul>
+            <li>Rice, roti, bread, pasta, noodles</li>
+            <li>Dal, sabzi, curry, soup with grains</li>
+            <li>Breakfast plate, lunch, dinner</li>
+            <li>Pizza, sandwich, burger, dosa, idli with sambar</li>
+            <li>A large portion of anything mixed, even if it is called healthy</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Snack <span>2.5 hours</span></summary>
+          <p>Light or small portions.</p>
+          <ul>
+            <li>Fruit: apple, banana, a handful of berries</li>
+            <li>A handful of nuts or dry fruit: almonds, walnuts, soaked peanuts, cashews, raisins</li>
+            <li>Biscuits, rusk, toast, chivda, a small sandwich</li>
+            <li>Yogurt or curd, a small bowl</li>
+            <li>Dates, a few soaked almonds</li>
+          </ul>
+          <p>Sweets and cold treats count as a snack:</p>
+          <ul>
+            <li>Ice cream, one scoop or a small cup</li>
+            <li>Chocolate, a few squares or a small bar</li>
+            <li>Cake, cookie, mithai, halwa, dessert</li>
+            <li>Milkshake, a thick smoothie, lassi</li>
+          </ul>
+          <p>A large ice cream bowl, a big chocolate bar, or dessert after a meal counts as a full meal.</p>
+        </details>
+
+        <details>
+          <summary>Beverage <span>1.5 hours</span></summary>
+          <ul>
+            <li>Tea, coffee, green tea</li>
+            <li>Juice, milk, buttermilk</li>
+            <li>Protein shake, a Sanjeevani-type drink</li>
+            <li>Soft drink, energy drink</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>Nuts <span>quick rule</span></summary>
+          <ul>
+            <li>A small handful of nuts, dry fruit, or soaked groundnuts is a snack: 2.5 hours.</li>
+            <li>A large handful with banana porridge or nut-butter toast is closer to a meal: 4 hours if it felt filling.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <section id="view-days" hidden>
+      <p class="days-head" id="days-head"><b id="days-date">22.09.2026</b><span id="days-sub">day 2 of 182 · two kriyas today</span></p>
+      <div class="switch" id="days-switch">
+        <button type="button" data-scope="month" aria-pressed="true">Month</button>
+        <button type="button" data-scope="all">All</button>
+      </div>
+      <div class="months" id="months"></div>
+    </section>
+
+    <section id="view-records" hidden>
+      <ul class="log rec" id="timings"></ul>
+    </section>
+
+    <nav class="nav" aria-label="Pages">
+      <button type="button" data-view="kriya" aria-current="page">Kriya</button>
+      <button type="button" data-view="food">Food</button>
+      <button type="button" data-view="days">Days</button>
+      <button type="button" data-view="records">Records</button>
+    </nav>
+  </div>
+
+  <section class="session" id="session" hidden aria-label="Guidance">
+    <div class="session-top">
+      <p class="mark">Kriya</p>
+      <button type="button" class="ghost" id="close-session">Close</button>
+    </div>
+    <p class="clock part-clock" id="elapsed">0:00</p>
+    <p class="step-name" id="step-name">Guidance</p>
+    <p class="section-note" id="mark-note" hidden>The sound mark could not play. The clock still runs.</p>
+    <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Drag to a part">
+    <div class="timeline" id="timeline"></div>
+    <div class="pause-row">
+      <button type="button" class="pause-icon" id="pause-kriya" aria-pressed="false" aria-label="Pause">
+        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5.5v13M15 5.5v13" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"></path>
+        </svg>
+        <svg class="icon-on" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 6.5l11 5.5-11 5.5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="timer-row">
+      <span>Timer</span>
+      <p class="clock" id="watch">00:00</p>
+      <button type="button" id="watch-toggle">Start</button>
+    </div>
+    <div id="pace">
+      <div class="row" id="speed-row">
+        <button type="button" class="ghost" data-rate="0.5">½</button>
+        <button type="button" class="ghost" data-rate="1">1×</button>
+        <button type="button" class="ghost" data-rate="1.5">1½</button>
+        <button type="button" class="ghost" data-rate="2">2×</button>
+      </div>
+      <div class="row">
+        <button type="button" class="ghost" id="prev-step">Previous</button>
+        <button type="button" class="ghost" id="next-step">Next</button>
+      </div>
+    </div>
+    <p class="step-kicker" id="step-kicker">Elapsed</p>
+    <p class="section-note" id="step-left"></p>
+    <div class="row">
+      <button type="button" class="ghost" id="sound-toggle">Sound on</button>
+    </div>
+
+    <h2>Saved timings</h2>
+    <ul class="timing-list" id="session-timings"></ul>
+
+    <form class="form" id="save-form">
+      <label>Save this kriya at
+        <input type="datetime-local" id="save-when" required>
+      </label>
+      <button type="submit" class="primary">Save this kriya</button>
+    </form>
+    <div class="row">
+      <button type="button" class="danger" id="discard-session">Discard</button>
+    </div>
+  </section>
+
+  <audio id="mark" src="data/SH%20Sadhguru.mp3" preload="auto"></audio>
+  <script src="js/rules.js"></script>
+  <script src="data/steps.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

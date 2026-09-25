@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kriya — nature palettes</title>
+  <style>
+    @font-face { font-family: Fraunces; font-style: italic; font-weight: 300; src: url("fonts/fraunces-italic.woff2") format("woff2"); }
+    @font-face { font-family: Fraunces; font-style: normal; font-weight: 300; src: url("fonts/fraunces-roman.woff2") format("woff2"); }
+    @font-face { font-family: Outfit; font-weight: 400; src: url("fonts/outfit-latin.woff2") format("woff2"); }
+    body { margin: 0; background: #1e2620; color: #e8eadf; font-family: Outfit, sans-serif; }
+    main { max-width: 1280px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { margin: 0; font-family: Fraunces, serif; font-weight: 300; font-style: italic; font-size: 34px; }
+    .lead { max-width: 44rem; color: #a8b09e; }
+    .opt { margin-top: 56px; }
+    .opt h2 { margin: 0; font-size: 20px; }
+    .opt > p { margin: 6px 0 0; color: #a8b09e; }
+    .row { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 16px; margin-top: 18px; }
+    .slot h3 { margin: 0 0 8px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #d4a15a; }
+    .phone {
+      min-height: 640px; border-radius: 26px; display: flex; flex-direction: column;
+      padding: 32px 18px 0; box-shadow: 0 18px 40px rgba(0,0,0,.28);
+      background: var(--paper); color: var(--ink);
+    }
+    .phone nav {
+      margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr);
+      text-align: center; font-size: 12px; padding: 10px 0 14px; color: var(--muted);
+    }
+    .phone nav b {
+      font-weight: 700; color: var(--ink); padding-bottom: 5px;
+      background-image: linear-gradient(90deg, var(--moss), var(--ochre));
+      background-size: 70% 2px; background-repeat: no-repeat; background-position: center bottom;
+    }
+    .t { font-family: Fraunces, serif; font-weight: 300; letter-spacing: -0.04em; line-height: 0.9; }
+    .note { color: var(--muted); font-size: 14px; }
+    button.go { margin-top: 16px; width: 100%; border: 0; border-radius: 999px; background: var(--moss); color: var(--on-moss); padding: 13px; font-size: 15px; }
+    .did { margin-top: 10px; background: none; border: 0; color: var(--moss); font-family: Fraunces, serif; font-style: italic; font-size: 18px; padding: 0; }
+    .msg { margin-top: 16px; font-size: 14px; color: var(--muted); }
+    .msg div { padding: 8px 0; border-top: 1px solid var(--line); }
+    .circles { width: 100%; display: grid; grid-template-columns: 1fr 1fr; justify-items: center; gap: 16px; }
+    .circles div { width: 86px; height: 86px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-align: center; }
+    .circles b, .circles small { display: block; margin: 0; line-height: 1; white-space: nowrap; }
+    .circles b { font-size: 14px; font-weight: 500; }
+    .circles small { font-size: 11px; font-variant-numeric: tabular-nums; opacity: 0.85; }
+    .c-meal { background: var(--moss); color: var(--on-moss); }
+    .c-snack { background: var(--ochre); color: var(--on-ochre); }
+    .c-drink { background: var(--tea); color: var(--on-moss); }
+    .c-water { box-shadow: inset 0 0 0 1px var(--line); }
+    ul.plain { list-style: none; margin: 14px 0 0; padding: 0; }
+    ul.plain li { display: flex; justify-content: space-between; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); }
+    .counts { margin-top: 16px; text-align: left; }
+    .counts details { border-top: 1px solid var(--line); }
+    .counts summary { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; list-style: none; font-family: Fraunces, serif; font-weight: 300; font-size: 18px; }
+    .counts summary::-webkit-details-marker { display: none; }
+    .counts summary span { font-family: Outfit, sans-serif; font-size: 12px; color: var(--ochre); }
+    .counts p { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+    .days-head { margin: 0; font-family: Fraunces, serif; font-style: italic; font-weight: 300; font-size: 15px; line-height: 1.35; color: var(--muted); }
+    .days-head b { display: block; color: var(--ink); font-family: Fraunces, serif; font-style: normal; font-weight: 300; font-size: 17px; }
+    .switch { display: flex; gap: 14px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+    .switch b { color: var(--ink); font-weight: 500; box-shadow: inset 0 -1px 0 var(--ochre); }
+    .month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-top: 16px; text-align: center; }
+    .month b, .month i { display: grid; place-items: center; width: 100%; aspect-ratio: 1; margin: 0; border-radius: 50%; font-style: normal; font-weight: 400; font-size: 11px; line-height: 1; }
+    .month .wd { aspect-ratio: auto; height: 18px; border-radius: 0; color: var(--muted); font-size: 10px; }
+    .month .pad { visibility: hidden; }
+    .month .done { background: var(--moss); color: var(--on-moss); }
+    .month .today { box-shadow: inset 0 0 0 1.5px var(--ochre); }
+    .month .ahead { color: var(--faint); }
+    ul.plain.rec li { display: grid; grid-template-columns: 1fr 4.5em auto; align-items: center; gap: 12px; }
+    .rec strong { font-family: Fraunces, serif; font-weight: 300; font-size: 28px; font-variant-numeric: tabular-nums; text-align: right; }
+    .rec em { font-style: normal; font-size: 12px; color: var(--muted); }
+    .page-name, .step { font-family: Fraunces, serif; font-style: italic; font-weight: 300; }
+    .page-name { font-size: 22px; text-align: center; }
+    .guide { background: var(--guide); color: var(--guide-ink); }
+    .guide .t, .guide .step, .guide .page-name, .guide .timer-row { color: var(--guide-ink); }
+    .timer-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+    .start-line, .pause { border: 1px solid var(--guide-moss); color: var(--guide-moss); background: transparent; }
+    .start-line { margin: 0; width: auto; padding: 8px 18px; border-radius: 999px; font-size: 15px; }
+    .pause { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; }
+    .line { display: flex; align-items: flex-end; margin-top: 16px; border-bottom: 1px solid var(--guide-rule); font-size: 12px; }
+    .line span { padding: 0 8px 6px; border-left: 1px solid var(--guide-rule); color: var(--guide-muted); }
+    .line .gap { width: 28px; text-align: center; color: var(--guide-mark); border-left-color: var(--guide-mark); border-right-color: var(--guide-mark); }
+    .line .on { color: var(--guide-moss); box-shadow: inset 0 -1px 0 var(--guide-mark); }
+    .opt1 { --paper:#e6eadb; --ink:#243026; --muted:#5c6754; --faint:#8a9180; --line:rgba(36,48,38,.16); --moss:#3f5c45; --on-moss:#f4f6ee; --ochre:#c4924a; --on-ochre:#2a2118; --tea:#314438; --guide:#e4d5bc; --guide-ink:#2e291f; --guide-muted:#6e6252; --guide-moss:#4a5c3c; --guide-mark:#b8883e; --guide-rule:rgba(70,52,28,.24); }
+    .opt2 { --paper:#e7f0e4; --ink:#1b3324; --muted:#4e6a56; --faint:#7e9484; --line:rgba(27,51,36,.16); --moss:#1f6a45; --on-moss:#f3faf4; --ochre:#d2a24a; --on-ochre:#2a2416; --tea:#1d4a38; --guide:#d7e6d4; --guide-ink:#1b3324; --guide-muted:#4e6a56; --guide-moss:#1f6a45; --guide-mark:#c4924a; --guide-rule:rgba(27,51,36,.2); }
+    .opt3 { --paper:#e5f0ea; --ink:#1c3330; --muted:#4d6a64; --faint:#7e9992; --line:rgba(28,51,48,.16); --moss:#1f6a62; --on-moss:#f2faf8; --ochre:#c9a15a; --on-ochre:#2a2416; --tea:#1a4e4a; --guide:#d5e6e1; --guide-ink:#1c3330; --guide-muted:#4d6a64; --guide-moss:#1f6a62; --guide-mark:#c9a15a; --guide-rule:rgba(28,51,48,.2); }
+    .opt4 { --paper:#f3ead8; --ink:#3a2e1e; --muted:#7a6248; --faint:#a08a70; --line:rgba(58,46,30,.16); --moss:#6a6b32; --on-moss:#f8f6ea; --ochre:#c46a32; --on-ochre:#2a1810; --tea:#5a4632; --guide:#f0e0c8; --guide-ink:#3a2e1e; --guide-muted:#7a6248; --guide-moss:#6a6b32; --guide-mark:#c46a32; --guide-rule:rgba(58,46,30,.2); }
+    .opt5 { --paper:#eef2df; --ink:#2c3818; --muted:#627048; --faint:#8a9870; --line:rgba(44,56,24,.16); --moss:#5d7a32; --on-moss:#f7faee; --ochre:#d4b14a; --on-ochre:#2a2410; --tea:#3e5228; --guide:#e4ebc8; --guide-ink:#2c3818; --guide-muted:#627048; --guide-moss:#5d7a32; --guide-mark:#c9a04a; --guide-rule:rgba(44,56,24,.2); }
+    .opt6 { --paper:#e8ebe3; --ink:#2a3128; --muted:#5e6a5c; --faint:#8a9488; --line:rgba(42,49,40,.16); --moss:#4a6352; --on-moss:#f4f6f2; --ochre:#b7a06a; --on-ochre:#2a2618; --tea:#3d4e44; --guide:#e3e0d4; --guide-ink:#2a3128; --guide-muted:#5e6a5c; --guide-moss:#4a6352; --guide-mark:#b7a06a; --guide-rule:rgba(42,49,40,.2); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Six nature palettes</h1>
+    <p class="lead">Option 1 is the design you chose. The other five keep every page the same and only change the colors. Guidance stays the lighter Deeper sand way of that palette, not a dark page.</p>
+    <section class="opt opt1" style="margin-top:28px">
+      <h2>Your sound in the guidance</h2>
+      <p>Press Next, or a name on the line. Each change plays <b>SH Sadhguru.mp3</b>.</p>
+      <div class="phone guide" id="live" style="max-width:360px">
+        <div class="page-name">Kriya</div>
+        <div style="text-align:center">
+          <div class="t" id="live-time" style="font-size:88px;margin-top:18px">0:40</div>
+          <div class="step" id="live-name">Asatoma</div>
+        </div>
+        <div class="line" id="live-line"></div>
+        <div style="display:flex;justify-content:center;margin-top:28px"><span class="pause">Ⅱ</span></div>
+        <div class="timer-row"><span>Timer</span><span class="t" style="font-size:22px">00:00</span><button class="start-line" type="button">Start</button></div>
+        <div class="timer-row"><button class="start-line" type="button" id="live-next">Next part</button></div>
+      </div>
+      <audio id="live-mark" src="data/SH%20Sadhguru.mp3" preload="auto"></audio>
+    </section>
+
+    <section class="opt opt1">
+      <h2>Option 1 · Moss and ochre</h2>
+      <p>The one already chosen. Green pages, ochre marks, sand guidance.</p>
+      <div class="screens"></div>
+    </section>
+    <section class="opt opt2">
+      <h2>Option 2 · Pine</h2>
+      <p>Deeper living green, with a soft gold mark.</p>
+      <div class="screens"></div>
+    </section>
+    <section class="opt opt3">
+      <h2>Option 3 · River</h2>
+      <p>Green that leans toward water, with a sandy gold mark.</p>
+      <div class="screens"></div>
+    </section>
+    <section class="opt opt4">
+      <h2>Option 4 · Orchard</h2>
+      <p>Warm ground, olive leaves, and a ripe ochre.</p>
+      <div class="screens"></div>
+    </section>
+    <section class="opt opt5">
+      <h2>Option 5 · Meadow</h2>
+      <p>A pale field green, with buttercup gold.</p>
+      <div class="screens"></div>
+    </section>
+    <section class="opt opt6">
+      <h2>Option 6 · Fern and stone</h2>
+      <p>Quiet grey-green, with lichen gold.</p>
+      <div class="screens"></div>
+    </section>
+  </main>
+  <template id="screens">
+    <div class="row">
+      <div class="slot"><h3>Kriya</h3>
+        <div class="phone">
+          <div class="t" style="font-size:76px">16:40</div>
+          <p class="note">Snack until 14:10. Tea until 15:10.</p>
+          <button class="go" type="button">Begin</button>
+          <button class="did" type="button">I did one today</button>
+          <p class="note">Today 0 of 2</p>
+          <div class="msg"><div>14:10 · no more snacks</div><div>15:10 · only water</div></div>
+          <nav><b>Kriya</b><span>Food</span><span>Days</span><span>Records</span></nav>
+        </div>
+      </div>
+      <div class="slot"><h3>Food</h3>
+        <div class="phone" style="height:auto">
+          <div class="circles">
+            <div class="c-meal"><b>Meal</b><small>closed</small></div>
+            <div class="c-snack"><b>Snack</b><small>1:10 left</small></div>
+            <div class="c-drink"><b>Tea</b><small>2:10 left</small></div>
+            <div class="c-water"><b>Water</b><small>open</small></div>
+          </div>
+          <ul class="plain"><li><span>Meal</span><span>12:40</span></li></ul>
+          <div class="counts">
+            <details><summary>Full meal <span>4 hours</span></summary><p>A proper plate: rice, roti, dal, sabzi, breakfast, lunch, dinner.</p></details>
+            <details><summary>Snack <span>2.5 hours</span></summary><p>Fruit, a small handful of nuts, biscuits, a small bowl of curd, a small sweet.</p></details>
+            <details><summary>Beverage <span>1.5 hours</span></summary><p>Tea, coffee, juice, milk, a shake, a soft drink.</p></details>
+            <details><summary>Nuts <span>quick rule</span></summary><p>A small handful is a snack. A large handful that feels filling is a meal.</p></details>
+          </div>
+          <nav><span>Kriya</span><b>Food</b><span>Days</span><span>Records</span></nav>
+        </div>
+      </div>
+      <div class="slot"><h3>Days</h3>
+        <div class="phone">
+          <p class="days-head"><b>22.09.2026</b>day 2 of 182 · two kriyas today</p>
+          <div class="switch"><b>Month</b><span>All</span></div>
+          <div class="month">
+            <i class="wd">M</i><i class="wd">T</i><i class="wd">W</i><i class="wd">T</i><i class="wd">F</i><i class="wd">S</i><i class="wd">S</i>
+            <b class="pad"></b><b class="ahead">1</b><b class="ahead">2</b><b class="ahead">3</b><b class="ahead">4</b><b class="ahead">5</b><b class="ahead">6</b>
+            <b class="ahead">7</b><b class="ahead">8</b><b class="ahead">9</b><b class="ahead">10</b><b class="ahead">11</b><b class="ahead">12</b><b class="ahead">13</b>
+            <b class="ahead">14</b><b class="ahead">15</b><b class="ahead">16</b><b class="ahead">17</b><b class="ahead">18</b><b class="ahead">19</b><b class="ahead">20</b>
+            <b class="done">21</b><b class="today">22</b><b class="ahead">23</b><b class="ahead">24</b><b class="ahead">25</b><b class="ahead">26</b><b class="ahead">27</b>
+            <b class="ahead">28</b><b class="ahead">29</b><b class="ahead">30</b>
+          </div>
+          <nav><span>Kriya</span><span>Food</span><b>Days</b><span>Records</span></nav>
+        </div>
+      </div>
+      <div class="slot"><h3>Records</h3>
+        <div class="phone">
+          <ul class="plain rec">
+            <li><span>22.09</span><strong>6:02</strong><em>Delete</em></li>
+            <li><span>21.09</span><strong>4:12</strong><em>Delete</em></li>
+          </ul>
+          <nav><span>Kriya</span><span>Food</span><span>Days</span><b>Records</b></nav>
+        </div>
+      </div>
+      <div class="slot"><h3>Guidance</h3>
+        <div class="phone guide">
+          <div class="page-name">Kriya</div>
+          <div style="text-align:center">
+            <div class="t" style="font-size:88px;margin-top:18px">1:12</div>
+            <div class="step">Butterfly</div>
+          </div>
+          <div class="line"><span>Asatoma</span><span class="on">Butterfly</span><span>Sukha</span></div>
+          <div style="display:flex;justify-content:center;margin-top:28px"><span class="pause">Ⅱ</span></div>
+          <div class="timer-row"><span>Timer</span><span class="t" style="font-size:22px">00:00</span><button class="start-line" type="button">Start</button></div>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    const html = document.getElementById("screens").innerHTML;
+    for (const slot of document.querySelectorAll(".screens")) slot.innerHTML = html;
+
+    const parts = [
+      ["Asatoma", "0:40"],
+      ["Butterfly", "2:00"],
+      ["Baby, right", "2:00"],
+      ["Baby, left", "2:00"],
+      ["Cat stretch", "4:50"],
+      ["0:10", "0:10"],
+      ["Sukha Kriya", "6:00"]
+    ];
+    const line = document.getElementById("live-line");
+    const nameEl = document.getElementById("live-name");
+    const timeEl = document.getElementById("live-time");
+    const mark = document.getElementById("live-mark");
+    let at = 0;
+
+    function draw() {
+      line.replaceChildren();
+      parts.forEach(([label], index) => {
+        const node = document.createElement("span");
+        node.textContent = label;
+        if (label === "0:10") node.className = "gap";
+        if (index === at) node.className = (node.className + " on").trim();
+        node.addEventListener("click", () => go(index));
+        line.append(node);
+      });
+      const [label, time] = parts[at];
+      nameEl.textContent = label === "0:10" ? "Change" : label;
+      timeEl.textContent = time;
+    }
+
+    function go(index) {
+      if (index === at) return;
+      at = (index + parts.length) % parts.length;
+      draw();
+      mark.currentTime = 0;
+      mark.play().catch(() => {});
+    }
+
+    document.getElementById("live-next").addEventListener("click", () => go(at + 1));
+    draw();
+  </script>
+</body>
+</html>

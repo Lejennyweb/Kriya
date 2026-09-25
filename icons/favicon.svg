@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kriya">
+  <rect width="64" height="64" fill="#14110e"/>
+  <defs>
+    <radialGradient id="lamp" cx="36%" cy="32%" r="68%">
+      <stop offset="0" stop-color="#f5d8b0"/>
+      <stop offset="0.45" stop-color="#d06a30"/>
+      <stop offset="1" stop-color="#5c2010"/>
+    </radialGradient>
+  </defs>
+  <path d="M42 14.7 A 20 20 0 1 1 22 14.7" fill="none" stroke="#f3e6d4" stroke-width="1.7" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="7.4" fill="url(#lamp)"/>
+</svg>
