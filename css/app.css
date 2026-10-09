@@ -534,8 +534,8 @@ select {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding-bottom: 9vh;
+  justify-content: flex-start;
+  padding-top: clamp(36px, 6.5vh, 64px);
 }
 
 .kriya-mid .row {
@@ -605,7 +605,7 @@ select {
 }
 
 #view-kriya #today-count {
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   font-family: var(--serif);
   font-style: italic;
   font-weight: 300;
@@ -627,7 +627,7 @@ select {
 }
 
 #view-kriya .messages {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .log .danger,

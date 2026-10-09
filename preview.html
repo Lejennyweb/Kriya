@@ -64,9 +64,9 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       width: 100%;
-      padding-bottom: 9vh;
+      padding-top: clamp(36px, 6.5vh, 64px);
     }
     .begin-row { display: flex; justify-content: center; margin-top: 0; }
     .begin {
@@ -80,7 +80,7 @@
       font: 500 15px/43px Outfit, sans-serif;
     }
     .status {
-      margin: 16px 0 0;
+      margin: 14px 0 0;
       text-align: center;
       color: var(--muted);
       font-family: Fraunces, serif;
@@ -88,7 +88,7 @@
       font-weight: 300;
       font-size: 15px;
     }
-    .notes { width: 100%; margin: 16px 0 0; padding: 0; list-style: none; }
+    .notes { width: 100%; margin: 20px 0 0; padding: 0; list-style: none; }
     .notes li {
       padding: 8px 0;
       border-top: 1px solid var(--line);
