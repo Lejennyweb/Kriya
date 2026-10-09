@@ -9,8 +9,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Kriya">
   <title>Kriya</title>
-  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/app.css">
@@ -35,11 +35,13 @@
         </div>
         <button type="button" class="ghost" id="open-guide">Open</button>
       </div>
-      <div class="row">
-        <button type="button" class="primary" id="start-guide">Begin</button>
+      <div class="kriya-mid">
+        <div class="row">
+          <button type="button" class="primary" id="start-guide">Begin</button>
+        </div>
+        <p class="section-note" id="today-count">0 of 2 is done</p>
+        <ul class="messages marks" id="messages"></ul>
       </div>
-      <p class="section-note" id="today-count">0 of 2 is done</p>
-      <ul class="messages marks" id="messages"></ul>
       <div class="day-actions">
         <button type="button" class="did" id="did-one">I did one today</button>
         <div class="ask" id="kriya-ask" hidden>

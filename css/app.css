@@ -80,6 +80,8 @@ p { margin: 0; }
   width: min(440px, 100%);
   min-height: 100dvh;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   padding: calc(44px + env(safe-area-inset-top)) 18px calc(84px + env(safe-area-inset-bottom));
   background:
     radial-gradient(700px 280px at 0% -8%, rgba(63, 92, 69, 0.12), transparent 52%),
@@ -449,8 +451,6 @@ select {
   text-align: left;
 }
 
-#start-guide { width: 100%; }
-
 #view-kriya,
 #view-food,
 #view-days,
@@ -460,6 +460,7 @@ select {
 
 #view-kriya.on {
   display: flex !important;
+  flex: 1;
   flex-direction: column;
 }
 
@@ -499,9 +500,9 @@ select {
 
 #view-kriya .count {
   min-width: 0;
-  font-size: clamp(64px, 18vw, 96px);
+  font-size: clamp(92px, 26vw, 112px);
   font-weight: 300;
-  line-height: 0.9;
+  line-height: 0.88;
   letter-spacing: -0.04em;
 }
 
@@ -515,22 +516,33 @@ select {
   line-height: 1.35;
 }
 
-#view-kriya > .row {
-  margin-top: 18px;
+.kriya-mid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 9vh;
+}
+
+.kriya-mid .row {
+  justify-content: center;
+  margin-top: 0;
 }
 
 #start-guide {
   box-sizing: border-box;
+  width: auto;
+  min-width: 196px;
   height: 43px;
   min-height: 0;
-  padding: 0 13px;
+  padding: 0 36px;
   font-size: 15px;
   font-weight: 400;
   line-height: 43px;
 }
 
 #view-kriya .day-actions {
-  margin-top: 22px;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -1,4 +1,4 @@
-const CACHE = "kriya-v35";
+const CACHE = "kriya-v36";
 
 const ASSETS = [
   "./index.html",
@@ -10,7 +10,6 @@ const ASSETS = [
   "./fonts/fraunces-roman.woff2",
   "./fonts/fraunces-italic.woff2",
   "./fonts/outfit-latin.woff2",
-  "./icons/favicon.svg",
   "./icons/favicon-32.png",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
