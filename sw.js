@@ -1,4 +1,4 @@
-const CACHE = "kriya-v39";
+const CACHE = "kriya-v40";
 
 const ASSETS = [
   "./index.html",
