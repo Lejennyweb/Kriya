@@ -1,4 +1,4 @@
-const CACHE = "kriya-v40";
+const CACHE = "kriya-v41";
 
 const ASSETS = [
   "./index.html",
@@ -11,15 +11,15 @@ const ASSETS = [
   "./fonts/fraunces-italic.woff2",
   "./fonts/outfit-latin.woff2",
   "./icons/favicon-32.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png",
-  "./icons/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => Promise.all(ASSETS.map((url) => cache.add(url).catch(() => {})))));
-  self.skipWaiting();
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => Promise.all(ASSETS.map((url) => cache.add(url).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -28,34 +28,28 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: "window" }))
-      .then((clients) => Promise.all(clients.map((client) => (client.navigate ? client.navigate(client.url).catch(() => {}) : Promise.resolve()))))
   );
 });
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  if (request.method !== "GET") return;
+  if (request.method !== "GET" || request.headers.has("range")) return;
+  if (new URL(request.url).origin !== self.location.origin) return;
 
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put("./index.html", copy));
-        return response;
-      }).catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
-
+  const key = request.mode === "navigate" ? "./index.html" : request;
   event.respondWith(
-    fetch(request).then((response) => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy));
-      }
-      return response;
-    }).catch(() => caches.match(request))
+    caches.open(CACHE).then((cache) =>
+      cache.match(key).then((byKey) => byKey || cache.match(request)).then((cached) => {
+        const refresh = fetch(request)
+          .then((response) => {
+            if (response && response.ok) cache.put(key, response.clone());
+            return response;
+          })
+          .catch(() => cached);
+        if (cached) return cached;
+        return refresh.then((response) => response || new Response("", { status: 503 }));
+      })
+    )
   );
 });
 
