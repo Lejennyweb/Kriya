@@ -17,6 +17,7 @@
     .icons img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 22%; display: block; background: #1c241e; }
     .icons figcaption { margin-top: 6px; text-align: center; font-size: 14px; }
     .phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; margin-top: 16px; }
+    .phones > div { flex: 0 0 390px; width: 390px; max-width: 100%; }
     .phone-label { margin: 0 0 8px; text-align: center; color: var(--muted); font-size: 14px; }
     .phone {
       position: relative;
@@ -86,9 +87,19 @@
       font-size: 14px;
     }
     .bottom { margin-top: auto; text-align: center; }
-    .did {
-      border: 0; background: transparent; color: var(--seal);
-      font-family: Fraunces, serif; font-style: italic; font-weight: 300; font-size: 17px;
+    .bottom .did {
+      display: inline-block;
+      width: auto;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--seal);
+      font-family: Fraunces, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 17px;
+      text-align: center;
     }
     .ask { margin-top: 8px; color: var(--muted); font-family: Fraunces, serif; font-style: italic; font-weight: 300; font-size: 14px; }
     .choices { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
