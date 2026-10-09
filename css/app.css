@@ -483,15 +483,24 @@ select {
   height: 36px;
   display: grid;
   place-items: center;
+  padding: 0;
+  line-height: 0;
   color: var(--muted);
-  background: transparent;
+  background: none;
   border: 1px solid currentColor;
   border-radius: 50%;
 }
 
 .bell svg {
-  width: 18px;
-  height: 18px;
+  display: block;
+  width: 20px;
+  height: 20px;
+  background: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .bell[aria-pressed="true"] {
@@ -914,6 +923,7 @@ select {
 .pause-row {
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 28px;
 }
 
@@ -941,22 +951,38 @@ select {
 }
 
 .pause-icon {
-  position: relative;
+  display: grid;
+  place-items: center;
   width: 48px;
   height: 48px;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
   border: 1px solid var(--sand-moss, #4a5c3c);
   border-radius: 50%;
+  background: none;
   color: var(--sand-moss, #4a5c3c);
 }
 
 .pause-icon svg {
-  position: absolute;
-  inset: 10px;
-  width: 24px;
-  height: 24px;
+  display: block;
+  width: 22px;
+  height: 22px;
+  background: none;
 }
 
-.pause-icon .icon-on { display: none; }
+.pause-icon .icon-pause {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.pause-icon .icon-on {
+  display: none;
+  fill: currentColor;
+  stroke: none;
+}
 
 .pause-icon[aria-pressed="true"] .icon-pause { display: none; }
 
