@@ -251,27 +251,50 @@
     return required > 0 && todayKriyas(date).length >= required;
   }
 
+  function foodLines(now) {
+    const allowance = R.allowance(now, state.meals, waitKriyas(now));
+    const limits = allowance.nowText
+      .split("\n")
+      .filter((line) => line.includes(" until "))
+      .map((line) => {
+        const clean = line.replace(/^A /, "").replace(/\.$/, "");
+        return clean.charAt(0).toUpperCase() + clean.slice(1);
+      });
+    return { allowance, limits };
+  }
+
+  function holdBox(node, hold) {
+    node.hidden = false;
+    node.classList.toggle("held", hold);
+    if (hold) {
+      node.setAttribute("inert", "");
+      node.setAttribute("aria-hidden", "true");
+    } else {
+      node.removeAttribute("inert");
+      node.removeAttribute("aria-hidden");
+    }
+  }
+
+  function releaseBox(node) {
+    node.classList.remove("held");
+    node.removeAttribute("inert");
+    node.removeAttribute("aria-hidden");
+  }
+
   function paintLive() {
     const now = Date.now();
+    const finished = dayFinished(now);
     const wait = R.bindingWait(now, state.meals, waitKriyas(now));
-    if (dayFinished(now)) {
-      ui.count.textContent = "Done";
-      ui.snackLine.textContent = "";
+    const { limits } = foodLines(now);
+    ui.count.textContent = finished ? "Done" : (wait.ready ? "Now" : formatWhen(wait.openAt));
+    ui.snackLine.textContent = limits.join(". ");
+    if (limits.length === 0) {
       ui.snackLine.hidden = true;
-      paintFood(now, { ready: true, openAt: now });
+      releaseBox(ui.snackLine);
     } else {
-      ui.count.textContent = wait.ready ? "Now" : formatWhen(wait.openAt);
-      const limits = R.allowance(now, state.meals, waitKriyas(now)).nowText
-        .split("\n")
-        .filter((line) => line.includes(" until "))
-        .map((line) => {
-          const clean = line.replace(/^A /, "").replace(/\.$/, "");
-          return clean.charAt(0).toUpperCase() + clean.slice(1);
-        });
-      ui.snackLine.textContent = limits.join(". ");
-      ui.snackLine.hidden = limits.length === 0;
-      paintFood(now, wait);
+      holdBox(ui.snackLine, finished);
     }
+    paintFood(now, finished ? { ready: true, openAt: now } : wait);
 
     if (state.session) {
       stopAtEnd(now);
@@ -354,14 +377,17 @@
 
     const finished = dayFinished(now);
     const shortMessage = { meal: "no more meals", snack: "no more snacks", beverage: "only water" };
-    const messages = finished
-      ? []
-      : R.allowance(Date.now(), state.meals, waitKriyas(Date.now())).messages
-        .filter((message) => shortMessage[message.kind]);
-    ui.messages.hidden = messages.length === 0;
+    const messages = foodLines(Date.now()).allowance.messages
+      .filter((message) => shortMessage[message.kind]);
     ui.messages.replaceChildren();
     for (const message of messages) {
       ui.messages.append(el("li", {}, `${formatWhen(message.at)} · ${shortMessage[message.kind]}`));
+    }
+    if (messages.length === 0) {
+      ui.messages.hidden = true;
+      releaseBox(ui.messages);
+    } else {
+      holdBox(ui.messages, finished);
     }
     ui.reminders.setAttribute("aria-pressed", state.reminders ? "true" : "false");
     ui.reminders.setAttribute("aria-label", state.reminders ? "Reminders on" : "Turn on reminders");
@@ -383,6 +409,16 @@
     const dismissed = state.kriyaAsk
       && state.kriyaAsk.day === R.dayKey(now)
       && state.kriyaAsk.atCount === logged.length;
+    if (missing <= 0 && required > 0) {
+      ask.hidden = false;
+      holdBox(ask, true);
+      $("missing-form").hidden = true;
+      $("kriya-ask-text").textContent = required === 1
+        ? "One kriya is not logged."
+        : "Two kriyas are not logged.";
+      return;
+    }
+    releaseBox(ask);
     if (missing <= 0 || dismissed) {
       ask.hidden = true;
       $("missing-form").hidden = true;

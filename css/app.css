@@ -46,6 +46,11 @@
 
 [hidden] { display: none !important; }
 
+.held {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 body {
   margin: 0;
   background: var(--desk);
