@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kriya preview</title>
+  <link rel="stylesheet" href="./css/app.css">
+  <style>
+    body { margin: 0; background: #d7dccf; }
+    .sheet { width: min(920px, 100%); margin: 0 auto; padding: 28px 16px 64px; }
+    h1, h2 { margin: 0; font-family: Fraunces, serif; font-weight: 300; color: var(--ink); }
+    h1 { font-size: 34px; }
+    h2 { margin-top: 40px; font-size: 24px; }
+    .lead { margin: 8px 0 18px; color: var(--muted); font-size: 15px; }
+    .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .icons figure { margin: 0; }
+    .icons img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 22%; display: block; background: #1c241e; }
+    .icons figcaption { margin-top: 6px; text-align: center; font-size: 14px; }
+    .phones { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; margin-top: 16px; }
+    .phone-label { margin: 0 0 8px; text-align: center; color: var(--muted); font-size: 14px; }
+    .phone {
+      position: relative;
+      width: min(390px, 100%);
+      height: 844px;
+      overflow: hidden;
+      border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(36, 48, 38, 0.16);
+      background: var(--paper);
+    }
+    .screen {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 18px 78px;
+      background:
+        radial-gradient(700px 280px at 0% -8%, rgba(63, 92, 69, 0.12), transparent 52%),
+        var(--paper);
+    }
+    .hero { display: flex; align-items: center; justify-content: space-between; }
+    .clock {
+      margin: 0;
+      font-family: Fraunces, serif;
+      font-weight: 300;
+      font-size: 112px;
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+    }
+    .bell {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--muted); color: var(--muted);
+      display: grid; place-items: center; background: transparent;
+    }
+    .bell svg { width: 18px; height: 18px; }
+    .allow {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-family: Fraunces, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 14px;
+    }
+    .begin-row { display: flex; justify-content: center; margin-top: 18px; }
+    .begin {
+      min-width: 196px;
+      height: 43px;
+      padding: 0 36px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--seal);
+      color: var(--seal-ink);
+      font: 500 15px/43px Outfit, sans-serif;
+    }
+    .status {
+      margin: 16px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-family: Fraunces, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 15px;
+    }
+    .notes { margin: 16px 0 0; padding: 0; list-style: none; }
+    .notes li {
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+    .bottom { margin-top: auto; text-align: center; }
+    .did {
+      border: 0; background: transparent; color: var(--seal);
+      font-family: Fraunces, serif; font-style: italic; font-weight: 300; font-size: 17px;
+    }
+    .ask { margin-top: 8px; color: var(--muted); font-family: Fraunces, serif; font-style: italic; font-weight: 300; font-size: 14px; }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+    .choices button {
+      border: 0; border-radius: 999px; background: transparent; color: var(--ink);
+      box-shadow: inset 0 0 0 1px var(--line);
+      min-height: 40px; padding: 8px 14px; font-size: 14px;
+    }
+    .bar {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line); background: var(--paper);
+    }
+    .bar span { text-align: center; padding: 14px 0 18px; color: var(--muted); font-size: 14px; }
+    .bar .on { color: var(--ink); font-weight: 500; box-shadow: inset 0 -2px 0 var(--ochre); }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Look first</h1>
+    <p class="lead">This page is only for choosing. The app itself is unchanged.</p>
+
+    <h2>Icons</h2>
+    <div class="icons">
+      <figure><img src="./preview/1.jpg" alt="Icon 1"><figcaption>1</figcaption></figure>
+      <figure><img src="./preview/2.jpg" alt="Icon 2"><figcaption>2</figcaption></figure>
+      <figure><img src="./preview/3.jpg" alt="Icon 3"><figcaption>3</figcaption></figure>
+      <figure><img src="./preview/4.jpg" alt="Icon 4"><figcaption>4</figcaption></figure>
+      <figure><img src="./preview/5.jpg" alt="Icon 5"><figcaption>5</figcaption></figure>
+      <figure><img src="./preview/6.jpg" alt="Icon 6"><figcaption>6</figcaption></figure>
+      <figure><img src="./preview/7.jpg" alt="Icon 7"><figcaption>7</figcaption></figure>
+      <figure><img src="./preview/8.jpg" alt="Icon 8"><figcaption>8</figcaption></figure>
+      <figure><img src="./preview/9.jpg" alt="Icon 9"><figcaption>9</figcaption></figure>
+      <figure><img src="./preview/10.jpg" alt="Icon 10"><figcaption>10</figcaption></figure>
+    </div>
+
+    <h2>Kriya page</h2>
+    <div class="phones">
+      <div>
+        <p class="phone-label">When the day is finished</p>
+        <div class="phone">
+          <div class="screen">
+            <div class="hero">
+              <p class="clock">Done</p>
+              <div class="bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4.2v1.3M6.8 16.8h10.4l-1.2-1.9V10a4 4 0 0 0-8 0v4.9l-1.2 1.9z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path><path d="M10 16.8a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.25"></path></svg></div>
+            </div>
+            <div class="begin-row"><button class="begin" type="button">Begin</button></div>
+            <p class="status">2 of 2 is done</p>
+            <div class="bottom"><button class="did" type="button">I did one today</button></div>
+          </div>
+          <div class="bar"><span class="on">Kriya</span><span>Food</span><span>Days</span><span>Records</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="phone-label">When a kriya is still missing</p>
+        <div class="phone">
+          <div class="screen">
+            <div class="hero">
+              <p class="clock">13:49</p>
+              <div class="bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4.2v1.3M6.8 16.8h10.4l-1.2-1.9V10a4 4 0 0 0-8 0v4.9l-1.2 1.9z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path><path d="M10 16.8a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.25"></path></svg></div>
+            </div>
+            <p class="allow">Snack until 11:19. Tea, coffee, or juice until 12:19</p>
+            <div class="begin-row"><button class="begin" type="button">Begin</button></div>
+            <p class="status">0 of 2 is done</p>
+            <ul class="notes"><li>11:19 · no more snacks</li><li>12:19 · only water</li></ul>
+            <div class="bottom">
+              <button class="did" type="button">I did one today</button>
+              <p class="ask">Two kriyas are not logged.</p>
+              <div class="choices">
+                <button type="button">Log a missing kriya</button>
+                <button type="button">I still need to do it</button>
+              </div>
+            </div>
+          </div>
+          <div class="bar"><span class="on">Kriya</span><span>Food</span><span>Days</span><span>Records</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
