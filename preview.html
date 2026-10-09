@@ -60,7 +60,14 @@
       font-weight: 300;
       font-size: 14px;
     }
-    .begin-row { display: flex; justify-content: center; margin-top: 18px; }
+    .middle {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+    }
+    .begin-row { display: flex; justify-content: center; margin-top: 0; }
     .begin {
       min-width: 196px;
       height: 43px;
@@ -80,13 +87,13 @@
       font-weight: 300;
       font-size: 15px;
     }
-    .notes { margin: 16px 0 0; padding: 0; list-style: none; }
+    .notes { width: 100%; margin: 16px 0 0; padding: 0; list-style: none; }
     .notes li {
       padding: 8px 0;
       border-top: 1px solid var(--line);
       font-size: 14px;
     }
-    .bottom { margin-top: auto; text-align: center; }
+    .bottom { text-align: center; }
     .bottom .did {
       display: inline-block;
       width: auto;
@@ -125,15 +132,9 @@
     <h2>Icons</h2>
     <div class="icons">
       <figure><img src="./preview/1.jpg" alt="Icon 1"><figcaption>1</figcaption></figure>
-      <figure><img src="./preview/2.jpg" alt="Icon 2"><figcaption>2</figcaption></figure>
       <figure><img src="./preview/3.jpg" alt="Icon 3"><figcaption>3</figcaption></figure>
-      <figure><img src="./preview/4.jpg" alt="Icon 4"><figcaption>4</figcaption></figure>
       <figure><img src="./preview/5.jpg" alt="Icon 5"><figcaption>5</figcaption></figure>
-      <figure><img src="./preview/6.jpg" alt="Icon 6"><figcaption>6</figcaption></figure>
-      <figure><img src="./preview/7.jpg" alt="Icon 7"><figcaption>7</figcaption></figure>
       <figure><img src="./preview/8.jpg" alt="Icon 8"><figcaption>8</figcaption></figure>
-      <figure><img src="./preview/9.jpg" alt="Icon 9"><figcaption>9</figcaption></figure>
-      <figure><img src="./preview/10.jpg" alt="Icon 10"><figcaption>10</figcaption></figure>
     </div>
 
     <h2>Kriya page</h2>
@@ -146,8 +147,10 @@
               <p class="clock">Done</p>
               <div class="bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4.2v1.3M6.8 16.8h10.4l-1.2-1.9V10a4 4 0 0 0-8 0v4.9l-1.2 1.9z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path><path d="M10 16.8a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.25"></path></svg></div>
             </div>
-            <div class="begin-row"><button class="begin" type="button">Begin</button></div>
-            <p class="status">2 of 2 is done</p>
+            <div class="middle">
+              <div class="begin-row"><button class="begin" type="button">Begin</button></div>
+              <p class="status">2 of 2 is done</p>
+            </div>
             <div class="bottom"><button class="did" type="button">I did one today</button></div>
           </div>
           <div class="bar"><span class="on">Kriya</span><span>Food</span><span>Days</span><span>Records</span></div>
@@ -162,9 +165,11 @@
               <div class="bell" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4.2v1.3M6.8 16.8h10.4l-1.2-1.9V10a4 4 0 0 0-8 0v4.9l-1.2 1.9z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path><path d="M10 16.8a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.25"></path></svg></div>
             </div>
             <p class="allow">Snack until 11:19. Tea, coffee, or juice until 12:19</p>
-            <div class="begin-row"><button class="begin" type="button">Begin</button></div>
-            <p class="status">0 of 2 is done</p>
-            <ul class="notes"><li>11:19 · no more snacks</li><li>12:19 · only water</li></ul>
+            <div class="middle">
+              <div class="begin-row"><button class="begin" type="button">Begin</button></div>
+              <p class="status">0 of 2 is done</p>
+              <ul class="notes"><li>11:19 · no more snacks</li><li>12:19 · only water</li></ul>
+            </div>
             <div class="bottom">
               <button class="did" type="button">I did one today</button>
               <p class="ask">Two kriyas are not logged.</p>
