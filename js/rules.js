@@ -54,6 +54,57 @@
     return GAP_MS[kind] || 0;
   }
 
+  // One pass of two finished kriyas for every practice day from the start through today.
+  // The finish used for the gap stays at least four hours back, so the fill does not close practice.
+  function markedDays(kriyas, now) {
+    const added = [];
+    const when = now instanceof Date ? now : new Date(now);
+    if (!Number.isFinite(when.getTime())) return added;
+    const counts = new Map();
+    for (const kriya of kriyas || []) {
+      if (!kriya || !Number.isFinite(kriya.at)) continue;
+      const key = dayKey(new Date(kriya.at));
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    const end = startOfDay(when);
+    const last = programEnd();
+    if (end > last) end.setTime(last.getTime());
+    const cursor = programStart();
+    if (cursor > end) return added;
+    const clearAt = when.getTime() - GAP_MS.kriya - 60 * 1000;
+    const hours = [8, 18];
+    while (cursor <= end) {
+      const key = dayKey(cursor);
+      const have = counts.get(key) || 0;
+      for (let n = have; n < 2; n += 1) {
+        const at = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate(), hours[Math.min(n, 1)], 0, 0, 0).getTime();
+        added.push({ at, finishedAt: at <= clearAt ? at : clearAt });
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return added;
+  }
+
+  function kriyaFinishedAt(kriya) {
+    if (!kriya) return NaN;
+    if (Number.isFinite(kriya.finishedAt)) return kriya.finishedAt;
+    return kriya.at;
+  }
+
+  function sessionFinishAt(session, totalMs, now) {
+    if (!session || !Number.isFinite(now)) return now;
+    if (!totalMs || !Number.isFinite(session.anchorWall) || !Number.isFinite(session.anchorElapsed)) return now;
+    const rate = Number(session.rate);
+    const speed = Number.isFinite(rate) && rate > 0 ? rate : 1;
+    if (session.paused && session.anchorElapsed >= totalMs) return session.anchorWall;
+    const elapsed = session.paused
+      ? session.anchorElapsed
+      : session.anchorElapsed + (now - session.anchorWall) * speed;
+    if (elapsed >= totalMs) return session.anchorWall + (totalMs - session.anchorElapsed) / speed;
+    if (session.paused) return now + (totalMs - session.anchorElapsed) / speed;
+    return session.anchorWall + (totalMs - session.anchorElapsed) / speed;
+  }
+
   function bindingWait(now, meals, kriyas) {
     let openAt = 0;
     let reason = null;
@@ -72,8 +123,9 @@
     }
 
     for (const kriya of kriyas || []) {
-      if (!Number.isFinite(kriya.at)) continue;
-      consider(kriya.at + GAP_MS.kriya, { type: "kriya", kriya });
+      const finished = kriyaFinishedAt(kriya);
+      if (!Number.isFinite(finished)) continue;
+      consider(finished + GAP_MS.kriya, { type: "kriya", kriya });
     }
 
     return { openAt, ready: now >= openAt, reason };
@@ -88,8 +140,9 @@
       if (until > now) rows.push({ until, type: "meal", meal });
     }
     for (const kriya of kriyas || []) {
-      if (!Number.isFinite(kriya.at)) continue;
-      const until = kriya.at + GAP_MS.kriya;
+      const finished = kriyaFinishedAt(kriya);
+      if (!Number.isFinite(finished)) continue;
+      const until = finished + GAP_MS.kriya;
       if (until > now) rows.push({ until, type: "kriya", kriya });
     }
     rows.sort((a, b) => b.until - a.until);
@@ -198,6 +251,9 @@
     requiredOn,
     programLengthDays,
     gapFor,
+    markedDays,
+    kriyaFinishedAt,
+    sessionFinishAt,
     bindingWait,
     activeWaits,
     formatWhen,

@@ -68,6 +68,72 @@ test("after food, the message says what is still allowed and the clock time it s
   assert.match(moved.nowText, /Tea, coffee, or juice until 15:30/);
 });
 
+test("four hours run from the finish of a kriya, not its start", () => {
+  const started = new Date(2026, 8, 21, 6, 0).getTime();
+  const totalMs = 34 * 60 * 1000;
+  const session = {
+    startedAt: started,
+    anchorWall: started,
+    anchorElapsed: 0,
+    rate: 1,
+    paused: false,
+  };
+  const finished = R.sessionFinishAt(session, totalMs, started);
+  assert.equal(finished, started + totalMs);
+
+  const fromFinish = R.bindingWait(started, [], [{ id: "k", at: started, finishedAt: finished }]);
+  assert.equal(fromFinish.openAt, finished + R.GAP_MS.kriya);
+  assert.equal(fromFinish.ready, false);
+
+  const loggedOnlyAtStart = R.bindingWait(started, [], [{ id: "k", at: started }]);
+  assert.equal(loggedOnlyAtStart.openAt, started + R.GAP_MS.kriya);
+
+  const pausedAt = started + 10 * 60 * 1000;
+  const paused = {
+    startedAt: started,
+    anchorWall: pausedAt,
+    anchorElapsed: 10 * 60 * 1000,
+    rate: 1,
+    paused: true,
+  };
+  const later = pausedAt + 50 * 60 * 1000;
+  assert.equal(R.sessionFinishAt(paused, totalMs, later), later + (totalMs - 10 * 60 * 1000));
+
+  const done = {
+    startedAt: started,
+    anchorWall: started + totalMs,
+    anchorElapsed: totalMs,
+    rate: 1,
+    paused: true,
+  };
+  assert.equal(R.sessionFinishAt(done, totalMs, started + totalMs + 60000), started + totalMs);
+});
+
+test("days through today are filled to two kriyas without closing practice", () => {
+  const now = new Date(2026, 9, 9, 10, 30, 0, 0);
+  const existing = [{ id: "kept", at: new Date(2026, 8, 21, 9, 0).getTime(), finishedAt: new Date(2026, 8, 21, 9, 0).getTime() }];
+  const added = R.markedDays(existing, now);
+  const all = existing.concat(added);
+  const byDay = new Map();
+  for (const item of all) {
+    const key = R.dayKey(new Date(item.at));
+    byDay.set(key, (byDay.get(key) || 0) + 1);
+  }
+  assert.equal(byDay.get("2026-09-19"), undefined);
+  assert.equal(byDay.get("2026-09-20"), 2);
+  assert.equal(byDay.get("2026-09-21"), 2);
+  assert.equal(byDay.get("2026-10-09"), 2);
+  assert.equal(byDay.get("2026-10-10"), undefined);
+  assert.equal(byDay.size, 20);
+
+  const open = R.bindingWait(now.getTime(), [], all);
+  assert.equal(open.ready, true);
+  for (const item of added) {
+    assert.ok(item.finishedAt <= now.getTime() - R.GAP_MS.kriya);
+  }
+  assert.equal(R.markedDays(all, now).length, 0);
+});
+
 test("steps advance on the clock and then finish", () => {
   const steps = [
     { name: "One", seconds: 60 },

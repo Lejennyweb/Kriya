@@ -21,9 +21,9 @@
     stepKicker: $("step-kicker"),
     stepName: $("step-name"),
     elapsed: $("elapsed"),
-    stepLeft: $("step-left"),
+    stepLeftTime: $("step-left-time"),
+    stepLeftLabel: $("step-left-label"),
     markNote: $("mark-note"),
-    pace: $("pace"),
     scrub: $("scrub"),
     timeline: $("timeline"),
     pauseKriya: $("pause-kriya"),
@@ -52,7 +52,7 @@
   });
 
   function blank() {
-    return { kriyas: [], meals: [], timings: [], session: null, soundOn: true, reminders: false, kriyaAsk: null };
+    return { kriyas: [], meals: [], timings: [], session: null, soundOn: true, reminders: false, kriyaAsk: null, daysMarked: false };
   }
 
   function normalizeAsk(ask) {
@@ -72,6 +72,7 @@
         soundOn: raw.soundOn !== false,
         reminders: raw.reminders === true,
         kriyaAsk: normalizeAsk(raw.kriyaAsk),
+        daysMarked: raw.daysMarked === true,
       };
     } catch {
       return blank();
@@ -81,13 +82,21 @@
   function normalizeSession(session) {
     if (!session || !Number.isFinite(session.startedAt)) return null;
     const rate = Number(session.rate);
+    const storedRate = Number.isFinite(rate) && rate > 0 ? rate : 1;
+    const paused = session.paused === true;
+    let anchorWall = Number.isFinite(session.anchorWall) ? session.anchorWall : session.startedAt;
+    let anchorElapsed = Number.isFinite(session.anchorElapsed) ? session.anchorElapsed : 0;
+    if (!paused && storedRate !== 1) {
+      anchorElapsed += (Date.now() - anchorWall) * storedRate;
+      anchorWall = Date.now();
+    }
     return {
       startedAt: session.startedAt,
       stopwatchStartedAt: Number.isFinite(session.stopwatchStartedAt) ? session.stopwatchStartedAt : null,
-      anchorWall: Number.isFinite(session.anchorWall) ? session.anchorWall : session.startedAt,
-      anchorElapsed: Number.isFinite(session.anchorElapsed) ? session.anchorElapsed : 0,
-      rate: Number.isFinite(rate) && rate > 0 ? rate : 1,
-      paused: session.paused === true,
+      anchorWall,
+      anchorElapsed,
+      rate: 1,
+      paused,
     };
   }
 
@@ -198,6 +207,36 @@
     return `${name} · clears ${formatWhen(row.until)}`;
   }
 
+  function migrateLastKriya() {
+    if (!state.kriyas.length) return;
+    const latest = state.kriyas.reduce((best, item) => (item.at > best.at ? item : best));
+    if (Number.isFinite(latest.finishedAt)) return;
+    const total = totalMs(steps());
+    if (!total) return;
+    const session = state.session;
+    const tiedToSession = session && Math.abs(session.startedAt - latest.at) < 2 * 60 * 1000;
+    latest.finishedAt = tiedToSession
+      ? R.sessionFinishAt(session, total, Date.now())
+      : latest.at + total;
+    save();
+  }
+
+  function markPastDays() {
+    if (state.daysMarked) return;
+    const added = R.markedDays(state.kriyas, new Date());
+    for (const item of added) {
+      state.kriyas.push({ id: uid(), at: item.at, finishedAt: item.finishedAt });
+    }
+    state.daysMarked = true;
+    save();
+  }
+
+  function waitKriyas(now) {
+    if (!state.session) return state.kriyas;
+    const finishedAt = R.sessionFinishAt(state.session, totalMs(steps()), now);
+    return state.kriyas.concat([{ id: "running", at: state.session.startedAt, finishedAt }]);
+  }
+
   function todayKriyas(now) {
     const date = now instanceof Date ? now : new Date(now);
     const key = R.dayKey(date);
@@ -214,7 +253,7 @@
 
   function paintLive() {
     const now = Date.now();
-    const wait = R.bindingWait(now, state.meals, state.kriyas);
+    const wait = R.bindingWait(now, state.meals, waitKriyas(now));
     if (dayFinished(now)) {
       ui.count.textContent = "Done";
       ui.snackLine.textContent = "";
@@ -222,7 +261,7 @@
       paintFood(now, { ready: true, openAt: now });
     } else {
       ui.count.textContent = wait.ready ? "Now" : formatWhen(wait.openAt);
-      const limits = R.allowance(now, state.meals, state.kriyas).nowText
+      const limits = R.allowance(now, state.meals, waitKriyas(now)).nowText
         .split("\n")
         .filter((line) => line.includes(" until "))
         .map((line) => {
@@ -237,11 +276,10 @@
     if (state.session) {
       stopAtEnd(now);
       const elapsed = guideElapsed(state.session, now);
-      const rate = state.session.rate;
       const done = totalMs(steps()) > 0 && elapsed >= totalMs(steps());
       if (done) ui.runningClock.textContent = "Finished";
       else if (state.session.paused) ui.runningClock.textContent = "Paused";
-      else ui.runningClock.textContent = rate === 1 ? R.formatClock(elapsed) : `${R.formatClock(elapsed)} · ${rate}×`;
+      else ui.runningClock.textContent = R.formatClock(elapsed);
       paintSession(now);
     }
   }
@@ -318,7 +356,7 @@
     const shortMessage = { meal: "no more meals", snack: "no more snacks", beverage: "only water" };
     const messages = finished
       ? []
-      : R.allowance(Date.now(), state.meals, state.kriyas).messages
+      : R.allowance(Date.now(), state.meals, waitKriyas(Date.now())).messages
         .filter((message) => shortMessage[message.kind]);
     ui.messages.hidden = messages.length === 0;
     ui.messages.replaceChildren();
@@ -333,7 +371,7 @@
     ui.startGuide.disabled = Boolean(state.session);
 
     renderMonths(now);
-    renderTimings(ui.timings, true);
+    renderTodayKriyas(ui.timings);
     renderTimings(ui.sessionTimings, false);
     paintLive();
     if (!ui.session.hidden) paintSession(Date.now());
@@ -360,8 +398,13 @@
     const list = ui.mealList;
     if (!list) return;
     const todayKey = R.dayKey(new Date());
+    const nowMs = Date.now();
     const meals = state.meals
-      .filter((item) => R.dayKey(new Date(item.finishedAt)) === todayKey)
+      .filter((item) => {
+        if (R.dayKey(new Date(item.finishedAt)) === todayKey) return true;
+        const gap = R.gapFor(item.kind);
+        return gap > 0 && item.finishedAt + gap > nowMs;
+      })
       .sort((a, b) => b.finishedAt - a.finishedAt);
     list.replaceChildren();
     if (!meals.length) {
@@ -372,7 +415,12 @@
     for (const item of meals) {
       const name = item.what ? `${kindLabel(item.kind)} · ${item.what}` : kindLabel(item.kind);
       const button = el("button", { type: "button", class: "danger", "data-action": "delete-meal", "data-id": item.id }, "Delete");
-      list.append(el("li", {}, el("span", {}, name), el("strong", {}, formatWhen(item.finishedAt)), button));
+      list.append(el(
+        "li",
+        {},
+        el("span", { class: "meal-name" }, name),
+        el("span", { class: "meal-when" }, el("strong", {}, formatWhen(item.finishedAt)), button)
+      ));
     }
   }
 
@@ -416,6 +464,7 @@
       const title = cursor.toLocaleString("en", { month: "long", year: "numeric" });
       const grid = el("div", { class: "grid" });
       for (const letter of ["M", "T", "W", "T", "F", "S", "S"]) grid.append(el("span", { class: "wd" }, letter));
+      grid.append(el("div", { class: "wd-rule" }));
       const first = new Date(year, month, 1);
       const lead = (first.getDay() + 6) % 7;
       for (let i = 0; i < lead; i += 1) grid.append(el("div", { class: "cell empty" }));
@@ -447,6 +496,22 @@
     }
   }
 
+  function renderTodayKriyas(list) {
+    const todayKey = R.dayKey(new Date());
+    const rows = state.kriyas
+      .filter((item) => R.dayKey(new Date(item.at)) === todayKey)
+      .sort((a, b) => b.at - a.at);
+    list.replaceChildren();
+    if (!rows.length) {
+      list.append(el("li", {}, "Nothing saved yet."));
+      return;
+    }
+    for (const item of rows) {
+      const remove = el("button", { type: "button", class: "danger", "data-action": "delete-kriya", "data-id": item.id }, "Delete");
+      list.append(el("li", {}, el("span", {}, "Kriya"), el("strong", {}, formatWhen(item.at)), remove));
+    }
+  }
+
   function renderTimings(list, asRecord) {
     const rows = state.timings.slice().sort((a, b) => b.at - a.at);
     list.replaceChildren();
@@ -465,6 +530,7 @@
     }
   }
 
+  let saveTimeEdited = false;
   let draggingScrub = false;
   let shownStep = -1;
   let cueNow = false;
@@ -480,8 +546,6 @@
     ui.pauseKriya.setAttribute("aria-pressed", state.session.paused ? "true" : "false");
     ui.soundToggle.textContent = state.soundOn ? "Sound on" : "Sound off";
     ui.markNote.hidden = !markMissing;
-    ui.pace.hidden = guide.length === 0;
-    paintSpeed(state.session.rate);
     if (guide.length && !draggingScrub) {
       const total = totalMs(guide);
       ui.scrub.value = String(total ? Math.round((Math.min(elapsed, total) / total) * 1000) : 0);
@@ -491,12 +555,12 @@
     if (!guide.length) {
       ui.stepKicker.textContent = "No steps yet";
       ui.stepName.textContent = "Open practice";
-      ui.stepLeft.textContent = "Add timings in data/steps.js. The clock is running.";
+      paintStepLeft("", "Add timings in data/steps.js. The clock is running.");
     } else if (step.finished) {
       const last = guide[step.index];
       ui.stepKicker.textContent = "Steps finished";
       ui.stepName.textContent = last.line || last.name;
-      ui.stepLeft.textContent = "Finished.";
+      paintStepLeft("", "Finished.");
     } else {
       const current = guide[step.index];
       const place = `${step.index + 1} of ${guide.length}`;
@@ -504,9 +568,10 @@
       ui.stepKicker.textContent = current.section && current.section !== "Change"
         ? `${current.section} · ${place}`
         : place;
-      ui.stepLeft.textContent = state.session.paused
-        ? "Paused"
-        : `${R.formatClock(step.leftMs)} left in this step`;
+      paintStepLeft(
+        R.formatClock(step.leftMs),
+        state.session.paused ? "Paused" : "left in this step"
+      );
     }
     syncCue(elapsed, step, guide);
     if (state.session.stopwatchStartedAt) {
@@ -516,12 +581,13 @@
       ui.watch.textContent = "00:00";
       ui.watchToggle.textContent = "Start";
     }
+    paintSaveTime(now);
   }
 
-  function paintSpeed(rate) {
-    for (const button of document.querySelectorAll("#speed-row [data-rate]")) {
-      button.setAttribute("aria-pressed", Number(button.dataset.rate) === rate ? "true" : "false");
-    }
+  function paintStepLeft(time, label) {
+    ui.stepLeftTime.hidden = !time;
+    ui.stepLeftTime.textContent = time;
+    ui.stepLeftLabel.textContent = label;
   }
 
   function buildTimeline(guide) {
@@ -558,7 +624,10 @@
     if (index !== shownStep) {
       shownStep = index;
       const onLine = ui.timeline.querySelector(`[data-step="${index}"]`);
-      if (onLine && onLine.scrollIntoView) onLine.scrollIntoView({ inline: "center", block: "nearest" });
+      if (onLine) {
+        const left = onLine.offsetLeft - (ui.timeline.clientWidth - onLine.offsetWidth) / 2;
+        ui.timeline.scrollTo({ left: Math.max(0, left) });
+      }
     }
   }
 
@@ -579,32 +648,6 @@
     if (!state.session) return;
     const total = totalMs(steps());
     placeSession(Math.max(0, Math.min(ms, total)));
-  }
-
-  function setRate(rate) {
-    if (!state.session) return;
-    const now = Date.now();
-    state.session.anchorElapsed = guideElapsed(state.session, now);
-    state.session.anchorWall = now;
-    state.session.rate = rate;
-    const total = totalMs(steps());
-    if (total && state.session.anchorElapsed >= total) state.session.paused = true;
-    save();
-    paintSession(now);
-    armFinish(now);
-  }
-
-  function goStep(delta) {
-    const guide = steps();
-    if (!guide.length || !state.session) return;
-    const now = Date.now();
-    const step = R.stepState(guide, guideElapsed(state.session, now));
-    const index = (step.finished ? guide.length : step.index) + delta;
-    if (index >= guide.length) {
-      seekTo(totalMs(guide));
-      return;
-    }
-    seekTo(stepStartMs(guide, Math.max(0, index)));
   }
 
   function syncCue(elapsed, step, guide) {
@@ -629,9 +672,15 @@
     });
   }
 
+  function paintSaveTime(now) {
+    if (!state.session || saveTimeEdited) return;
+    const next = toLocalInput(R.sessionFinishAt(state.session, totalMs(steps()), now));
+    if (ui.saveWhen.value !== next) ui.saveWhen.value = next;
+  }
+
   function openSession() {
     ui.session.hidden = false;
-    ui.saveWhen.value = toLocalInput(state.session.startedAt);
+    paintSaveTime(Date.now());
     paintSession(Date.now());
   }
 
@@ -647,7 +696,10 @@
   }
 
   $("did-one").addEventListener("click", () => {
-    state.kriyas.push({ id: uid(), at: Date.now() });
+    const finishedAt = state.session
+      ? R.sessionFinishAt(state.session, totalMs(steps()), Date.now())
+      : Date.now();
+    state.kriyas.push({ id: uid(), at: finishedAt, finishedAt });
     commit();
     tell();
   });
@@ -667,7 +719,8 @@
 
   $("missing-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    state.kriyas.push({ id: uid(), at: fromTimeToday($("missing-when").value) });
+    const finishedAt = fromTimeToday($("missing-when").value);
+    state.kriyas.push({ id: uid(), at: finishedAt, finishedAt });
     state.kriyaAsk = null;
     $("missing-form").hidden = true;
     commit();
@@ -694,11 +747,40 @@
     tell();
   });
 
+  $("forgot-food").addEventListener("click", () => {
+    $("forgot-form").hidden = false;
+    $("forgot-when").value = toLocalInput(Date.now());
+    $("forgot-note").hidden = true;
+  });
+
+  $("forgot-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const kind = $("forgot-kind").value;
+    const finishedAt = new Date($("forgot-when").value).getTime();
+    const note = $("forgot-note");
+    if (!["meal", "snack", "beverage", "water"].includes(kind) || Number.isNaN(finishedAt)) {
+      note.hidden = false;
+      note.textContent = "Enter the time you finished.";
+      return;
+    }
+    if (finishedAt > Date.now() + 60 * 1000) {
+      note.hidden = false;
+      note.textContent = "That time has not happened yet.";
+      return;
+    }
+    state.meals.push({ id: uid(), kind, what: "", finishedAt });
+    $("forgot-form").hidden = true;
+    note.hidden = true;
+    commit();
+    tell();
+  });
+
   $("start-guide").addEventListener("click", () => {
     if (state.session) {
       openSession();
       return;
     }
+    saveTimeEdited = false;
     const started = Date.now();
     state.session = {
       startedAt: started,
@@ -725,21 +807,22 @@
     closeSessionView();
   });
 
+  ui.saveWhen.addEventListener("input", () => {
+    saveTimeEdited = true;
+  });
+
   $("save-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    state.kriyas.push({ id: uid(), at: fromLocalInput(ui.saveWhen.value) });
+    const finishedAt = saveTimeEdited
+      ? fromLocalInput(ui.saveWhen.value)
+      : R.sessionFinishAt(state.session, totalMs(steps()), Date.now());
+    state.kriyas.push({ id: uid(), at: finishedAt, finishedAt });
     state.session = null;
     lastCue = null;
     clearFinishTimer();
     commit();
     tell();
     closeSessionView();
-  });
-
-  $("speed-row").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-rate]");
-    if (!button) return;
-    setRate(Number(button.dataset.rate));
   });
 
   ui.scrub.addEventListener("pointerdown", () => {
@@ -783,9 +866,6 @@
     if (!button) return;
     showView(button.dataset.view);
   });
-
-  $("prev-step").addEventListener("click", () => goStep(-1));
-  $("next-step").addEventListener("click", () => goStep(1));
 
   function jumpToPart(event) {
     const button = event.target.closest("[data-step]");
@@ -880,13 +960,13 @@
     }
 
     const now = Date.now();
-    for (const message of R.allowance(now, state.meals, state.kriyas).messages) {
+    for (const message of R.allowance(now, state.meals, waitKriyas(now)).messages) {
       if (message.at > now) scheduleAt(message.at, `kriya-${message.kind}`, message.body);
     }
   }
 
   function tell() {
-    const text = R.allowance(Date.now(), state.meals, state.kriyas).nowText;
+    const text = R.allowance(Date.now(), state.meals, waitKriyas(Date.now())).nowText;
     if (text) notifyNow(text);
   }
 
@@ -912,6 +992,8 @@
     }, delay));
   }
 
+  migrateLastKriya();
+  markPastDays();
   showView("kriya");
   render();
   armFinish(Date.now());

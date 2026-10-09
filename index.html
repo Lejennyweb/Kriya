@@ -49,7 +49,7 @@
             <button type="button" class="ghost" id="still-to-do">I still need to do it</button>
           </div>
           <form class="form" id="missing-form" hidden>
-            <label>Time
+            <label>Finished
               <input type="time" id="missing-when" required>
             </label>
             <button type="submit" class="primary">Log it</button>
@@ -66,7 +66,24 @@
         <button type="button" data-food="water"><b>Water</b><small id="food-water">open</small></button>
       </div>
       <ul class="log meal-log" id="meal-list" hidden></ul>
-      <p class="rules">Also 4 hours after the previous kriya. Water is fine any time.</p>
+      <div class="forgot">
+        <button type="button" class="did" id="forgot-food">I forgot to log</button>
+        <form class="form" id="forgot-form" hidden>
+          <label>What
+            <select id="forgot-kind" required>
+              <option value="meal">Meal</option>
+              <option value="snack">Snack</option>
+              <option value="beverage">Tea, coffee, or juice</option>
+              <option value="water">Water</option>
+            </select>
+          </label>
+          <label>Finished
+            <input type="datetime-local" id="forgot-when" required>
+          </label>
+          <p class="section-note" id="forgot-note" hidden></p>
+          <button type="submit" class="primary">Log it</button>
+        </form>
+      </div>
 
       <div class="counts">
         <h2>What counts</h2>
@@ -151,9 +168,11 @@
     </div>
     <p class="clock part-clock" id="elapsed">0:00</p>
     <p class="step-name" id="step-name">Guidance</p>
+    <p class="step-kicker" id="step-kicker"></p>
     <p class="section-note" id="mark-note" hidden>The sound mark could not play. The clock still runs.</p>
     <input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Drag to a part">
     <div class="timeline" id="timeline"></div>
+    <p class="step-left" id="step-left"><span id="step-left-time"></span><span id="step-left-label"></span></p>
     <div class="pause-row">
       <button type="button" class="pause-icon" id="pause-kriya" aria-pressed="false" aria-label="Pause">
         <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
@@ -169,20 +188,6 @@
       <p class="clock" id="watch">00:00</p>
       <button type="button" id="watch-toggle">Start</button>
     </div>
-    <div id="pace">
-      <div class="row" id="speed-row">
-        <button type="button" class="ghost" data-rate="0.5">½</button>
-        <button type="button" class="ghost" data-rate="1">1×</button>
-        <button type="button" class="ghost" data-rate="1.5">1½</button>
-        <button type="button" class="ghost" data-rate="2">2×</button>
-      </div>
-      <div class="row">
-        <button type="button" class="ghost" id="prev-step">Previous</button>
-        <button type="button" class="ghost" id="next-step">Next</button>
-      </div>
-    </div>
-    <p class="step-kicker" id="step-kicker">Elapsed</p>
-    <p class="section-note" id="step-left"></p>
     <div class="row">
       <button type="button" class="ghost" id="sound-toggle">Sound on</button>
     </div>
@@ -191,7 +196,7 @@
     <ul class="timing-list" id="session-timings"></ul>
 
     <form class="form" id="save-form">
-      <label>Save this kriya at
+      <label>Finished at
         <input type="datetime-local" id="save-when" required>
       </label>
       <button type="submit" class="primary">Save this kriya</button>
