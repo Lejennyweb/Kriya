@@ -159,8 +159,47 @@
     return ms;
   }
 
+  let screenLock = null;
+  let screenLockFailed = false;
+
+  function guidanceRunning(now) {
+    if (!state.session) return false;
+    const total = totalMs(steps());
+    if (!total) return true;
+    return guideElapsed(state.session, now) < total;
+  }
+
+  function dropScreen() {
+    const lock = screenLock;
+    screenLock = null;
+    if (lock) lock.release().catch(() => {});
+  }
+
+  function holdScreen() {
+    if (!guidanceRunning(Date.now())) {
+      screenLockFailed = false;
+      dropScreen();
+      return;
+    }
+    if (document.visibilityState !== "visible" || screenLock || screenLockFailed) return;
+    if (!navigator.wakeLock) return;
+    navigator.wakeLock.request("screen").then((lock) => {
+      if (!guidanceRunning(Date.now()) || document.visibilityState !== "visible") {
+        lock.release().catch(() => {});
+        return;
+      }
+      screenLock = lock;
+      lock.addEventListener("release", () => {
+        if (screenLock === lock) screenLock = null;
+      });
+    }).catch(() => {
+      screenLockFailed = true;
+    });
+  }
+
   function save() {
     localStorage.setItem(KEY, JSON.stringify(state));
+    holdScreen();
   }
 
   function uid() {
@@ -1033,6 +1072,17 @@
   showView("kriya");
   render();
   armFinish(Date.now());
+  holdScreen();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    screenLockFailed = false;
+    holdScreen();
+  });
+  document.addEventListener("pointerdown", () => {
+    if (screenLock || !guidanceRunning(Date.now())) return;
+    screenLockFailed = false;
+    holdScreen();
+  });
   setInterval(paintLive, 1000);
 
   if ("serviceWorker" in navigator && (location.protocol === "http:" || location.protocol === "https:")) {
